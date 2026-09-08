@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+
+# Datasets
+data/
+datasets/
+
+# Model checkpoints
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# Experiment outputs
+outputs/
+runs/
+logs/
+
+# Large representation files
+embeddings/
+*.npy
+*.npz
+
+# Environment / secrets
+.env
+*.env
+
+# Temporary files
+tmp/
+temp/
