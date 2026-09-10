@@ -7,7 +7,8 @@ from tqdm import tqdm
 from src.data.datasets import get_stl10_pretrain_dataset
 from src.models.simclr import SimCLR
 from src.losses.nt_xent import NTXentLoss
-
+from torch.utils.tensorboard import SummaryWriter
+import subprocess
 
 # --------------------------------------------------
 # Configuration
@@ -23,7 +24,7 @@ device = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
 
-
+writer = SummaryWriter(log_dir="runs/stl10_simclr")
 # --------------------------------------------------
 # Dataset
 # --------------------------------------------------
@@ -101,6 +102,8 @@ for epoch in range(epochs):
 
     running_loss = 0.0
 
+    global_step = 0
+
     progress_bar = tqdm(
         dataloader,
         desc=f"Epoch {epoch + 1}/{epochs}",
@@ -132,6 +135,14 @@ for epoch in range(epochs):
 
             loss = criterion(z1, z2)
 
+            writer.add_scalar(
+                            "Loss/train_step",
+                            loss.item(),
+                            global_step,
+            )
+
+            global_step += 1
+
         scaler.scale(loss).backward()
 
         scaler.step(optimizer)
@@ -145,6 +156,12 @@ for epoch in range(epochs):
         )
 
     average_loss = running_loss / len(dataloader)
+
+    writer.add_scalar(
+                    "Loss/train_epoch",
+                    average_loss,
+                    epoch + 1,
+    )
 
     print(
         f"Epoch {epoch + 1}: "
@@ -166,3 +183,25 @@ for epoch in range(epochs):
         },
         checkpoint_path,
     )
+
+    s3_path = (
+            "s3://lachqar/"
+            "self-supervised-visual-representation-learning/"
+            "checkpoints/stl10/"
+            f"epoch_{epoch + 1:03d}.pt"
+    )
+
+    subprocess.run(
+        [
+            "aws",
+            "s3",
+            "cp",
+            checkpoint_path,
+            s3_path,
+            "--endpoint-url",
+            os.environ["AWS_ENDPOINT_URL"],
+        ],
+        check=True,
+    )
+
+writer.close()
