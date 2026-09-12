@@ -1,0 +1,5 @@
+{
+    "random_frozen_resnet50_accuracy": 6.2732673267326735,
+    "simclr_frozen_resnet50_accuracy": 56.423762376237626,
+    "improvement_percentage_points": 50.150495049504954
+}
